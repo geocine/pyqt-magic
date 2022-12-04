@@ -9,7 +9,7 @@ The application in this repository provides a simple interface for experimenting
 
 ## Getting Started
 1. Clone the repository: `git clone https://github.com/geocine/pyqt-magic.git`
-2. Install the requirements: `pip install -r requirements.txt`
+2. Make sure you have a proper PyQt 5 environment.
 3. Run the application: `python main.py`
 
 ## Contributions
