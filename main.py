@@ -1,7 +1,6 @@
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QBoxLayout, QSpacerItem, QSizePolicy, QStackedWidget
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QHBoxLayout, QBoxLayout, QSpacerItem, QSizePolicy, QStackedWidget
 
 
 class VerticalTabWidget(QWidget):
@@ -39,26 +38,28 @@ class VerticalTabWidget(QWidget):
         self.stack = QStackedWidget()
         self.mainLayout.addWidget(self.stack)
 
-    def addTab(self, tab, page):
+    def addTab(self, tab):
+        # Get the tab content from the tab item
+        tab_content = tab.get_tab_content()
+
         # Set the tab width and height to be the same as the tabWidget
         tab.setFixedWidth(self.tabWidget.width())
         tab.setFixedHeight(self.tabButtonHeight)
         scale = 0.7
         # Set the icon size to be the same as the tabButtonHeight
         tab.setIconSize(QSize(int(scale * self.tabWidget.width()),
-                              int(scale * self.tabButtonHeight)))
+                                   int(scale * self.tabButtonHeight)))
 
         # Set the size policy of the tab to be fixed
         tab.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-
         # Add the tab and page to the list
-        self.tabs.append((tab, page))
+        self.tabs.append((tab, tab_content))
 
         # Add the tab to the vertical layout
         self.tabLayout.insertWidget(len(self.tabs) - 1, tab)
 
         # Add the page to the stack widget
-        self.stack.addWidget(page)
+        self.stack.addWidget(tab_content)
 
         # Create a signal to show the page when the tab is clicked
         tab.clicked.connect(self.showPage)
@@ -108,9 +109,12 @@ class VerticalTabWidget(QWidget):
         self.tabButtonHeight = height
 
 
-class FlatButton(QPushButton):
+class TabItem(QPushButton):
     def __init__(self, icon, parent=None):
-        super(FlatButton, self).__init__(parent)
+        super(TabItem, self).__init__(parent)
+        self.tab_layout = QBoxLayout(QBoxLayout.TopToBottom)
+        self.tab_content = QWidget()
+        self.tab_content.setLayout(self.tab_layout)
 
         # Icon is an svg file
         # Create a QPixmap object from the icon file
@@ -166,6 +170,21 @@ class FlatButton(QPushButton):
         self.style().unpolish(self)
         self.style().polish(self)
 
+    def get_tab_content(self):
+        return self.tab_content
+
+    def setContentStyleSheet(self, style_sheet):
+        # Set the style sheet for the tab content widget
+        self.tab_content.setStyleSheet(style_sheet)
+
+    def setContentLayout(self, layout):
+        # Set the layout for the tab content widget
+        self.tab_content.setLayout(layout)
+
+    def addLayoutWidget(self, widget):
+        # Add a widget to the tab content layout
+        self.tab_layout.addWidget(widget)
+
 
 if __name__ == "__main__":
     app = QApplication([])
@@ -176,33 +195,33 @@ if __name__ == "__main__":
     tabWidget.setTabButtonHeight(50)
 
     # Create some tabs and pages
-    tab1 = FlatButton("train_model.svg")
-    page1 = QWidget()
-    page1.setStyleSheet("background-color: red")
-    tabWidget.addTab(tab1, page1)
+    label1 = QLabel("This is the first page")
+    label1.setAlignment(Qt.AlignCenter)
 
-    tab2 = FlatButton("infer_model.svg")
-    page2 = QWidget()
-    page2.setStyleSheet("background-color: green")
-    tabWidget.addTab(tab2, page2)
+    tab1 = TabItem("train_model.svg")
+    tab1.setContentStyleSheet("background-color: red")
+    tab1.addLayoutWidget(label1)
+
+    tabWidget.addTab(tab1)
+
+    tab2 = TabItem("infer_model.svg")
+    tab2.setContentStyleSheet("background-color: green")
+    tabWidget.addTab(tab2)
 
     # create a tab and page for the third tab
-    tab3 = FlatButton("interrogate.svg")
-    page3 = QWidget()
-    page3.setStyleSheet("background-color: blue")
-    tabWidget.addTab(tab3, page3)
+    tab3 = TabItem("interrogate.svg")
+    tab3.setContentStyleSheet("background-color: blue")
+    tabWidget.addTab(tab3)
 
     # create a tab and page for the fourth tab
-    tab4 = FlatButton("convert.svg")
-    page4 = QWidget()
-    page4.setStyleSheet("background-color: yellow")
-    tabWidget.addTab(tab4, page4)
+    tab4 = TabItem("convert.svg")
+    tab4.setContentStyleSheet("background-color: yellow")
+    tabWidget.addTab(tab4)
 
     # create a tab and page for the fifth tab
-    tab5 = FlatButton("settings.svg")
-    page5 = QWidget()
-    page5.setStyleSheet("background-color: purple")
-    tabWidget.addTab(tab5, page5)
+    tab5 = TabItem("settings.svg")
+    tab5.setContentStyleSheet("background-color: orange")
+    tabWidget.addTab(tab5)
 
     # Show the tab widget
     tabWidget.show()
